@@ -1,0 +1,224 @@
+# Enable Powerlevel10k instant prompt. Should stay close to the top of ~/.zshrc.
+# Initialization code that may require console input (password prompts, [y/n]
+# confirmations, etc.) must go above this block; everything else may go below.
+if [[ -r "${XDG_CACHE_HOME:-$HOME/.cache}/p10k-instant-prompt-${(%):-%n}.zsh" ]]; then
+  source "${XDG_CACHE_HOME:-$HOME/.cache}/p10k-instant-prompt-${(%):-%n}.zsh"
+fi
+
+# If you come from bash you might have to change your $PATH.
+export PATH=$HOME/bin:/usr/local/bin:$PATH
+
+# Uncomment this after k8scli_install.sh is applied
+export PATH="${KREW_ROOT:-$HOME/.krew}/bin:$PATH"
+
+# Path to your oh-my-zsh installation.
+export ZSH="/home/poulix/.oh-my-zsh"
+
+# Set name of the theme to load
+# See https://github.com/ohmyzsh/ohmyzsh/wiki/Themes
+ZSH_THEME="powerlevel10k/powerlevel10k"
+
+# Uncomment the following line to use case-sensitive completion.
+CASE_SENSITIVE="true"
+
+# Uncomment the following line to use hyphen-insensitive completion.
+# Case-sensitive completion must be off. _ and - will be interchangeable.
+# HYPHEN_INSENSITIVE="true"
+
+# Uncomment the following line to disable bi-weekly auto-update checks.
+# DISABLE_AUTO_UPDATE="true"
+
+# Uncomment the following line to automatically update without prompting.
+DISABLE_UPDATE_PROMPT="true"
+
+# Uncomment the following line to change how often to auto-update (in days).
+# export UPDATE_ZSH_DAYS=13
+
+# Uncomment the following line if pasting URLs and other text is messed up.
+# DISABLE_MAGIC_FUNCTIONS="true"
+
+# Uncomment the following line to disable auto-setting terminal title.
+# DISABLE_AUTO_TITLE="true"
+
+# Uncomment the following line to enable command auto-correction.
+# ENABLE_CORRECTION="true"
+
+# Uncomment the following line to display red dots whilst waiting for completion.
+COMPLETION_WAITING_DOTS="true"
+
+# Uncomment the following line if you want to disable marking untracked files
+# under VCS as dirty. This makes repository status check for large repositories
+# much, much faster.
+DISABLE_UNTRACKED_FILES_DIRTY="true"
+
+# Uncomment the following line if you want to change the command execution time
+# stamp shown in the history command output.
+# You can set one of the optional three formats:
+# "mm/dd/yyyy"|"dd.mm.yyyy"|"yyyy-mm-dd"
+# or set a custom format using the strftime function format specifications,
+# see 'man strftime' for details.
+# HIST_STAMPS="mm/dd/yyyy"
+
+# Would you like to use another custom folder than $ZSH/custom?
+# ZSH_CUSTOM=/path/to/new-custom-folder
+
+# Which plugins would you like to load?
+# Standard plugins can be found in $ZSH/plugins/
+# Custom plugins may be added to $ZSH_CUSTOM/plugins/
+# Example format: plugins=(rails git textmate ruby lighthouse)
+# Add wisely, as too many plugins slow down shell startup.
+plugins=(
+    git
+    alias-finder            # Finds registered aliases of commands: alias-finder "git commit" -> gm
+    zsh-autosuggestions     # It suggests commands as you type based on history and completions.
+    docker                  # Docker
+    kubectl                 # Kubernetes
+    tmux                    # Tmux multiplexer
+    ansible                 # Ansible: SSH * N
+    aws                     # Amazon Web Services
+)
+
+source $ZSH/oh-my-zsh.sh
+
+# User configuration
+
+# export MANPATH="/usr/local/man:$MANPATH"
+
+# You may need to manually set your language environment
+export LANG=en_US.UTF-8
+
+# Preferred editor for local and remote sessions
+if [[ -n $SSH_CONNECTION ]]; then
+  export EDITOR='vi'
+else
+  export EDITOR='nvim'
+fi
+
+# Compilation flags
+# export ARCHFLAGS="-arch x86_64"
+
+# Set personal aliases, overriding those provided by oh-my-zsh libs,
+# plugins, and themes. Aliases can be placed here, though oh-my-zsh
+# users are encouraged to define aliases within the ZSH_CUSTOM folder.
+# For a full list of active aliases, run `alias`.
+
+# Zsh aliases
+alias zshconf="nvim ~/.zshrc"
+alias omzconf="nvim ~/.oh-my-zsh"
+alias zshsrc="source ~/.zshrc"
+
+# Other aliases
+alias ls="lsd"
+alias grep="rg"
+
+# Clipboard copy / paste aliases
+alias clip_copy="clip.exe"                          # echo "aaa" | clip_copy
+alias clip_paste="powershell.exe Get-Clipboard | dos2unix | xargs"     # echo $(clip_paste)
+
+# To customize prompt, run `p10k configure` or edit ~/.p10k.zsh.
+[[ ! -f ~/.p10k.zsh ]] || source ~/.p10k.zsh
+
+
+# Keyboard selection & edit in shell (Shift + arrows)
+#
+start-selection() {
+  ((REGION_ACTIVE)) || zle set-mark-command
+  zle $1 -- $@
+}
+
+clear-selection() {
+  ((REGION_ACTIVE = 0))
+  zle $1 -- $@
+}
+
+ delete-region-or-char() {
+    if ((REGION_ACTIVE)) then
+        zle kill-region
+    else
+        zle delete-char
+    fi
+}
+
+delete-region-or-backward-char() {
+    if ((REGION_ACTIVE)) then
+        zle kill-region
+    else
+        zle backward-delete-char
+    fi
+}
+
+copy-buffer() {
+    zle copy-region-as-kill
+    echo $CUTBUFFER | clip_copy
+}
+
+cut-buffer() {
+    zle copy-region-as-kill
+    zle kill-region
+    echo $CUTBUFFER | clip_copy
+}
+
+paste-buffer() {
+    BUFFER=$LBUFFER`clip_paste`$RBUFFER
+}
+
+shift-left() start-selection backward-char
+shift-right() start-selection forward-char
+ctrl-shift-left() start-selection backward-word
+ctrl-shift-right() start-selection forward-word
+arrow-left() clear-selection backward-char
+arrow-right() clear-selection forward-char
+ctrl-arrow-left() clear-selection backward-word
+ctrl-arrow-right() clear-selection forward-word
+key-home() clear-selection beginning-of-line
+key-end() clear-selection end-of-line
+shift-home() start-selection beginning-of-line
+shift-end() start-selection end-of-line
+
+zle -N shift-left
+zle -N shift-right
+zle -N ctrl-shift-left
+zle -N ctrl-shift-right
+zle -N clear-selection
+zle -N arrow-left
+zle -N arrow-right
+zle -N ctrl-arrow-left
+zle -N ctrl-arrow-right
+zle -N delete-region-or-char
+zle -N delete-region-or-backward-char
+zle -N key-home
+zle -N key-end
+zle -N shift-home
+zle -N shift-end
+zle -N copy-buffer
+zle -N cut-buffer
+zle -N paste-buffer
+
+## Terminal Keymap (use `cat -v`)
+# See https://github.com/softmoth/zsh-vim-mode/blob/master/zsh-vim-mode.plugin.zsh
+
+bindkey '^[OD'      arrow-left                      # [LeftArrow] - clear selecton if exists and move cursor left
+bindkey '^[OC'      arrow-right                     # [RightArrow] - clear selecton if exists and move cursor right
+bindkey '^[[1;2D'   shift-left                      # [Shift-LeftArrow] - select left char
+bindkey '^[[1;2C'   shift-right                     # [Shift-RightArrow] - select right char
+bindkey '^[[1;6D'   ctrl-shift-left                 # [Ctrl-Shift-Left] - select left word
+bindkey '^[[1;6C'   ctrl-shift-right                # [Ctrl-Shift-Right] - select right word
+bindkey '^[[1;5D'   ctrl-arrow-left                 # [Ctrl-LeftArrow] - clear selecton if exists and move backward one word
+bindkey '^[[1;5C'   ctrl-arrow-right                # [Ctrl-RightArrow] - clear selecton if exists and move forward one word
+bindkey '^[OH'      key-home                        # [Home] - clear selecton if exists and go to beginning of line
+bindkey '^[OF'      key-end                         # [End] - clear selecton if exists and go to end of line
+bindkey '^[[1;2H'   shift-home                      # [Shift-Home] - select from current position to beginning of line
+bindkey '^[[1;2F'   shift-end                       # [Shift-End] - select from current position to end of line
+bindkey '^[[3~'     delete-region-or-char           # [Delete] - delete selected region or char when no selection
+bindkey '^?'        delete-region-or-backward-char  # [BackSpace] - delete selected region or backward char when no selection
+
+# [Ctrl-E] - edit command prompt in vim
+bindkey '^E' edit-command-line
+#
+# [Ctrl-Space] - accept autosuggest command (zsh-autosuggestions plugin)
+bindkey '^@' autosuggest-accept
+
+# [Ctrl-Y] [Ctrl-P] [Ctrl-X] - copy, paste, cut
+bindkey '^Y' copy-buffer
+bindkey '^P' paste-buffer
+bindkey '^X' cut-buffer
