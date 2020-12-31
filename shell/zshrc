@@ -12,7 +12,7 @@ export PATH=$HOME/bin:/usr/local/bin:$PATH
 export PATH="${KREW_ROOT:-$HOME/.krew}/bin:$PATH"
 
 # Path to your oh-my-zsh installation.
-export ZSH="/home/poulix/.oh-my-zsh"
+export ZSH="/home/user/.oh-my-zsh"
 
 # Set name of the theme to load
 # See https://github.com/ohmyzsh/ohmyzsh/wiki/Themes
@@ -94,6 +94,11 @@ else
   export EDITOR='nvim'
 fi
 
+# Fuzzy search backend (RipGrep)
+if type rg &> /dev/null; then
+    export FZF_DEFAULT_COMMAND='rg --files --hidden'
+fi
+
 # Compilation flags
 # export ARCHFLAGS="-arch x86_64"
 
@@ -104,19 +109,55 @@ fi
 
 # Zsh aliases
 alias zshconf="nvim ~/.zshrc"
-alias omzconf="nvim ~/.oh-my-zsh"
 alias zshsrc="source ~/.zshrc"
+alias zshlean="source ~/.p10k.lean.zsh"
+alias zshclassic="source ~/.p10k.classic.zsh"
+alias omzconf="nvim ~/.oh-my-zsh"
+
+# Kubernetes
+alias kg="kubectl get"
+alias kd="kubectl describe"
+
+alias kn="kubectl neat"
+alias kng="kubectl neat get"
+
+alias kl='kubectl logs --tail=2000'
+alias kla='kubectl logs'
+
+alias kctx="kubectl config get-contexts"
+alias kuser="kubectl config get-contexts | grep '\*' | awk '{print \$2}'"
+alias kns="kubectl config get-contexts | grep '\*' | awk '{print \$5}'"
+alias kcns="kubectl config set-context --current --namespace"
+
+alias kshell="! kubectl get pods 2>1 | grep -q 'No resources' && kubectl exec -it \`kubectl get pods | fzf | awk '{print \$1}'\` -- sh || echo 'No pods are running in current namespace'"
+alias kshellb="! kubectl get pods 2>1 | grep -q 'No resources' && kubectl exec -it \`kubectl get pods | fzf | awk '{print \$1}'\` -- bash || echo 'No pods are running in current namespace'"
+alias kshella="kubectl exec -it \`kubectl get pods -A | fzf | awk '{print \$2 \" -n \" \$1}'\` -- sh"
+alias kshellab="kubectl exec -it \`kubectl get pods -A | fzf | awk '{print \$2 \" -n \" \$1}'\` -- bash"
+
+alias knodeport="kubectl get svc | grep -q NodePort && echo \"\`kubectl get nodes -o wide | awk 'NR==2{print \$6}'\`:\`kubectl get svc | grep NodePort | fzf | awk '{print \$5}' | awk -F '[:/]' '{print \$2}'\`\" || echo \"No NodePort services found\""
+alias knodeporta="kubectl get svc -A | grep -q NodePort && echo \"\`kubectl get nodes -o wide | awk 'NR==2{print \$6}'\`:\`kubectl get svc -A | grep NodePort | fzf | awk '{print \$6}' | awk -F '[:/]' '{print \$2}'\`\" || echo \"No NodePort services found\""
+alias kloadbalancer="kubectl get svc | grep -q LoadBalancer && echo \"\`kubectl get svc | grep LoadBalancer | fzf | awk {'print \$4 \":\" \$5'} | awk -F '[:/]' '{print \$1 \":\" \$2}'\`\" || echo \"No LoadBalancer services found\""
+alias kloadbalancera="kubectl get svc -A | grep -q LoadBalancer && echo \"\`kubectl get svc -A | grep LoadBalancer | fzf | awk {'print \$5 \":\" \$6'} | awk -F '[:/]' '{print \$1 \":\" \$2}'\`\" || echo \"No LoadBalancer services found\""
+alias kclusterip="kubectl get svc | grep -q ClusterIP && echo \"\`kubectl get svc | grep ClusterIP | fzf | awk {'print \$3 \":\" \$5'} | awk -F '[:/]' '{print \$1 \":\" \$2}'\`\" || echo \"No ClusterIP services found\""
+alias kclusteripa="kubectl get svc -A | grep -q ClusterIP && echo \"\`kubectl get svc -A | grep ClusterIP | fzf | awk {'print \$4 \":\" \$6'} | awk -F '[:/]' '{print \$1 \":\" \$2}'\`\" || echo \"No ClusterIP services found\""
+
+alias ksecret="! kubectl get secrets 2>1 | grep -q 'No resources' && kubectl get secret \`kubectl get secrets | fzf | awk '{print \$1}'\` -oyaml | kubectl neat | fzf --sync | awk '{print \$2}' | base64 -d | xargs || echo 'No secrets found'"
+alias ksecreta="kubectl get secret \`kubectl get secrets -A | fzf -0 | awk '{print \$2 \" -n \" \$1}'\` -oyaml | kubectl neat | fzf --sync | awk '{print \$2}' | base64 -d | xargs"
+alias kconfigmap="! kubectl get configmaps 2>1 | grep -q 'No resources' && kubectl get configmap \`kubectl get configmap | fzf | awk '{print \$1}'\` -oyaml | kubectl neat || echo 'No configmaps found'"
+alias kconfigmapa="kubectl get configmap \`kubectl get configmap -A | fzf -0 | awk '{print \$2 \" -n \" \$1}'\` -oyaml | kubectl neat"
+
+# terraform
+alias tf="terraform"
 
 # Other aliases
 alias ls="lsd"
 alias grep="rg"
+alias findfiles='_findfiles(){ [[ -z $1 ]] && searchpath="." || searchpath=$1; find $searchpath -path "/mnt/*" -prune -o -print 2>/dev/null; unset -f _findfiles; }; _findfiles'
+
 
 # Clipboard copy / paste aliases
-alias clip_copy="clip.exe"                          # echo "aaa" | clip_copy
-alias clip_paste="powershell.exe Get-Clipboard | dos2unix | xargs"     # echo $(clip_paste)
-
-# To customize prompt, run `p10k configure` or edit ~/.p10k.zsh.
-[[ ! -f ~/.p10k.zsh ]] || source ~/.p10k.zsh
+alias clip_copy="clip.exe"                                              # echo "aaa" | clip_copy
+alias clip_paste="powershell.exe Get-Clipboard | dos2unix | xargs"      # echo $(clip_paste)
 
 
 # Keyboard selection & edit in shell (Shift + arrows)
@@ -222,3 +263,9 @@ bindkey '^@' autosuggest-accept
 bindkey '^Y' copy-buffer
 bindkey '^P' paste-buffer
 bindkey '^X' cut-buffer
+
+
+[ -f ~/.fzf.zsh ] && source ~/.fzf.zsh
+
+# To customize prompt, run `p10k configure` or edit ~/.p10k.zsh.
+[[ ! -f ~/.p10k.zsh ]] || source ~/.p10k.zsh
