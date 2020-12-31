@@ -96,7 +96,8 @@ fi
 
 # Fuzzy search backend (RipGrep)
 if type rg &> /dev/null; then
-    export FZF_DEFAULT_COMMAND='rg --files --hidden'
+    export FZF_DEFAULT_COMMAND='fd --type file --hidden --no-ignore'
+    export FZF_DEFAULT_OPTS='-m --height 60% --border'
 fi
 
 # Compilation flags
@@ -108,10 +109,13 @@ fi
 # For a full list of active aliases, run `alias`.
 
 # Zsh aliases
-alias zshconf="nvim ~/.zshrc"
-alias zshsrc="source ~/.zshrc"
 alias zshlean="source ~/.p10k.lean.zsh"
 alias zshclassic="source ~/.p10k.classic.zsh"
+
+# Config edit
+alias zshconf="nvim ~/.zshrc"
+alias zshsrc="source ~/.zshrc"
+alias nvimconf="nvim ~/.config/nvim/init.vim"
 alias omzconf="nvim ~/.oh-my-zsh"
 
 # Kubernetes
@@ -152,7 +156,7 @@ alias tf="terraform"
 # Other aliases
 alias ls="lsd"
 alias grep="rg"
-alias findfiles='_findfiles(){ [[ -z $1 ]] && searchpath="." || searchpath=$1; find $searchpath -path "/mnt/*" -prune -o -print 2>/dev/null; unset -f _findfiles; }; _findfiles'
+alias fd="fdfind --exclude /mnt"
 
 
 # Clipboard copy / paste aliases
