@@ -1,1 +1,1 @@
-sudo apt remove -y ripgrep lsd jq dos2unix
+sudo apt remove -y ripgrep fd lsd jq dos2unix
