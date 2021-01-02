@@ -115,8 +115,9 @@ alias zshclassic="source ~/.p10k.classic.zsh"
 # Config edit
 alias zshconf="nvim ~/.zshrc"
 alias zshsrc="source ~/.zshrc"
-alias nvimconf="nvim ~/.config/nvim/init.vim"
 alias omzconf="nvim ~/.oh-my-zsh"
+alias nvimconf="nvim ~/.config/nvim/init.vim"
+alias vifmconf="nvim ~/.vifm/vifmrc"
 
 # Kubernetes
 alias kg="kubectl get"

@@ -1,0 +1,85 @@
+" ------------------------------------------------------------------------------
+
+set vicmd=$EDITOR
+set syscalls
+
+" Use trash when deleting files
+set trash
+set trashdir='~/.trash'
+set undolevels=1000
+
+set history=1000
+set nofollowlinks
+set sortnumbers
+set vimhelp
+set norunexec
+
+colorscheme gruvbox
+
+set timefmt=%d/%m/%Y\ %H:%M
+
+" Shell completions
+set wildmenu
+set wildstyle=popup
+set suggestoptions=normal,visual,view,otherpane,keys,marks,registers
+
+" Search
+set ignorecase
+set smartcase
+set nohlsearch
+set incsearch
+
+set dotfiles
+set scrolloff=4
+
+" Don't do too many requests to slow file systems
+if !has('win')
+    set slowfs=curlftpfs
+endif
+
+" Set custom status line look
+" set viewcolumns=-60%{name},20%{size},{mtime}
+" set statusline="  Hint: %z%= %A %10u:%-7g %15s %20d  "
+
+bmark! /mnt/c/users/pasha/Downloads windows downloads
+bmark! /mnt/c/users/pasha windows user
+bmark! ~/ wsl home
+bmark! ~/.ssh wsl ssh
+
+" Block particular shortcut
+"
+map <left> <nop>
+map <right> <nop>
+map <BS> gh
+
+" Totalcmd
+" map <f3> :!nvim -R %f &<cr>
+nnoremap <f3> :!less -N -S %f<cr>
+nnoremap <f4> :edit<cr>
+nnoremap <f5> :copy<cr>
+nnoremap <f6> :move<cr>
+nnoremap <f7> :mkdir<space>
+nnoremap <f8> :delete<cr>
+
+" Preview
+noremap <C-Q> :view<cr>
+
+" Select files
+map <Space> t
+
+" Swap panes
+nnoremap <c-u> <c-w>x
+
+" Горячая клавиша для вызова меню с закладками
+map <C-D> :bmarks<cr>
+
+" Выбрать всё
+map <C-A> ggVG<cr>
+
+"--------------------------------------------------------------------------------
+" Viewing files
+
+" filetype *.jpg,*.jpeg,*.png,*.gif feh %f 2>/dev/null &
+" filetype *.md5 md5sum -c %f
+" fileviewer {*.*} less -S -N %c
+" fileviewer {*.tar.gz} less -S -N %c
