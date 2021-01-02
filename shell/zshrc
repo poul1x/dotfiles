@@ -95,9 +95,9 @@ else
 fi
 
 # Fuzzy search backend (RipGrep)
-if type rg &> /dev/null; then
-    export FZF_DEFAULT_COMMAND='fd --type file --hidden --no-ignore'
-    export FZF_DEFAULT_OPTS='-m --height 60% --border'
+if type fd-find &> /dev/null; then
+    export FZF_DEFAULT_COMMAND='fd-find --type file --hidden --no-ignore'
+    export FZF_DEFAULT_OPTS='-m --height 50% --border'
 fi
 
 # Compilation flags
