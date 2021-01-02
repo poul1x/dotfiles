@@ -7,4 +7,4 @@ rm -rf -- ~/.oh-my-zsh/themes/powerlevel10k
 chmod +x  ~/.oh-my-zsh/tools/uninstall.sh
 yes | ~/.oh-my-zsh/tools/uninstall.sh
 sudo apt remove zsh -y
-
+sudo chsh -s /bin/bash user
