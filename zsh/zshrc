@@ -114,6 +114,12 @@ fi
 # users are encouraged to define aliases within the ZSH_CUSTOM folder.
 # For a full list of active aliases, run `alias`.
 
+# openvpn - 1350
+alias set-mtu="sudo ip link set dev eth0 mtu"
+
+# Use windows git
+alias gitw="git.exe"
+
 # Zsh aliases
 alias zshlean="source ~/.p10k.lean.zsh"
 alias zshclassic="source ~/.p10k.classic.zsh"
