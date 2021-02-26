@@ -14,6 +14,12 @@ export PATH="${KREW_ROOT:-$HOME/.krew}/bin:$PATH"
 # Path to your oh-my-zsh installation.
 export ZSH="/home/user/.oh-my-zsh"
 
+# Folder where configuration of my tools is stored
+export DOTFILES_DIR=$HOME/Documents/dotfiles
+
+# Folder where python virtual envs stored
+export VIRTUALENV_DIR=$HOME/.virtualenv
+
 # Set name of the theme to load
 # See https://github.com/ohmyzsh/ohmyzsh/wiki/Themes
 ZSH_THEME="powerlevel10k/powerlevel10k"
@@ -133,6 +139,48 @@ alias vifmconf="nvim ~/.vifm/vifmrc"
 
 # Editor
 alias view="nvim -R"
+
+# Python virtualenv operations
+
+_mkvirtualenv() {
+    if [ -n "$1" ]
+    then
+        mkdir "$VIRTUALENV_DIR/$1" && \
+        python3 -m venv "$VIRTUALENV_DIR/$1" && \
+        source "$VIRTUALENV_DIR/$1/bin/activate" && \
+        echo "Virtualenv $1 created and activated" || \
+        echo "Failed to create virtualenv $1"
+    else
+        echo "Please, specify the name of python virtualenv"
+    fi
+}
+
+_rmvirtualenv() {
+    venv=`ls $VIRTUALENV_DIR | fzf`
+    if [ -n "$venv" ]
+    then
+        rm -rf "$VIRTUALENV_DIR/$venv"
+        echo "Virtualenv $venv is removed"
+    else
+        echo "Python virtualenv was not selected"
+    fi
+}
+
+_usevirtualenv() {
+    venv=`ls $VIRTUALENV_DIR | fzf`
+    if [ -n "$venv" ]
+    then
+        source "$VIRTUALENV_DIR/$venv/bin/activate"
+        echo "Virtualenv $venv is activated"
+    else
+        echo "Python virtualenv was not selected"
+    fi
+}
+
+alias mkvirtualenv='_mkvirtualenv'
+alias rmvirtualenv="_rmvirtualenv"
+alias usevirtualenv="_usevirtualenv"
+alias lsvirtualenv="ls $VIRTUALENV_DIR"
 
 # Kubernetes
 alias kg="kubectl get"

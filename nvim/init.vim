@@ -9,7 +9,7 @@ endif
 """""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 " VimPlug
 
-call plug#begin('~/config/nvim/plugged')
+call plug#begin('~/.config/nvim/plugged')
 
 Plug 'vim-airline/vim-airline'
 Plug 'vim-airline/vim-airline-themes'
@@ -91,4 +91,4 @@ nnoremap <silent> <Leader>g :Commits<CR>
 nnoremap <silent> <Leader>H :Helptags<CR>
 nnoremap <silent> <Leader>hh :History<CR>
 nnoremap <silent> <Leader>h: :History:<CR>
-nnoremap <silent> <Leader>h/ :History/<CR> 
+nnoremap <silent> <Leader>h/ :History/<CR>
