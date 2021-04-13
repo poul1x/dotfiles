@@ -6,7 +6,17 @@ install_from_url () {
 }
 
 dotfiles_install() {
-    sudo apt install -y ripgrep fd-find jq dos2unix git wget gpg apt-transport-https &&
+    sudo apt install -y \
+        ripgrep \
+        fd-find \
+        jq \
+        dos2unix \
+        git \
+        wget \
+        gpg \
+        apt-transport-https \
+        software-properties-common \
+        && \
     install_from_url "https://github.com/Peltoche/lsd/releases/download/0.19.0/lsd_0.19.0_amd64.deb"
     find . -name "*_install.sh" | awk  -F '/' '{print "cd ./" $2 "; chmod +x " $3 " && ./" $3 "; cd ../"}' | sh
     echo "nvim -> :PlugInstall"
@@ -15,5 +25,5 @@ dotfiles_install() {
 
 dotfiles_uninstall() {
     find . -name "*_uninstall.sh" | awk  -F '/' '{print "cd ./" $2 "; chmod +x " $3 " && ./" $3 "; cd ../"}' | sh
-    sudo apt autoremove -y ripgrep fd-find lsd jq dos2unix git wget gpg apt-transport-https
+    sudo apt autoremove -y ripgrep fd-find lsd jq dos2unix git wget gpg apt-transport-https software-properties-common
 }

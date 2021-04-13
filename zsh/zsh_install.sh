@@ -14,4 +14,6 @@ git clone https://github.com/zsh-users/zsh-autosuggestions ~/.oh-my-zsh/plugins/
 # Use your .p10k.zsh or configure manually
 cp zshrc ~/.zshrc
 cp p10k.zsh ~/.p10k.zsh
+cp p10k.classic.zsh ~/.p10k.classic.zsh
+cp p10k.lean.zsh ~/.p10k.lean.zsh
 

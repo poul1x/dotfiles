@@ -1,6 +1,6 @@
 # Remove p10k
 # And remove all references of p10k in ~/.zshrc
-rm -f ~/.p10k.zsh
+rm -f ~/.p10k.zsh ~/.p10k.classic.zsh ~/.p10k.lean.zsh
 rm -rf -- ~/.oh-my-zsh/themes/powerlevel10k
 
 # Remove "Oh my zsh" and zsh
