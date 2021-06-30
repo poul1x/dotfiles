@@ -142,6 +142,10 @@ alias vifmconf="nvim ~/.vifm/vifmrc"
 # Editor
 alias view="nvim -R"
 
+# Git repo config
+alias git-config-local="git config user.email 'poulix.nova@mail.ru'; git config user.name 'Pavel Knyazev'"
+alias git-config-dsec="git config user.email 'p.knyazev@dsec.ru'; git config user.name 'Pavel Knyazev'"
+
 # Python virtualenv operations
 
 _mkvirtualenv() {
