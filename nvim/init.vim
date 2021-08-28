@@ -17,6 +17,7 @@ Plug 'tomasiser/vim-code-dark'
 
 Plug 'PProvost/vim-ps1'
 Plug 'hashivim/vim-terraform'
+Plug 'cespare/vim-toml'
 
 Plug 'tpope/vim-commentary'
 Plug 'tpope/vim-surround'
