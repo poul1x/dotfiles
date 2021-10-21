@@ -1,0 +1,59 @@
+https://tools.suckless.org/dmenu/patches/border/ 1 + 
+https://tools.suckless.org/dmenu/patches/center/ 2 +
+
+https://tools.suckless.org/dmenu/patches/grid/ last +/-
+https://tools.suckless.org/dmenu/patches/gridnav/ last +/-
+https://tools.suckless.org/dmenu/patches/fuzzyhighlight/ 3
+https://tools.suckless.org/dmenu/patches/fuzzymatch/
+
+https://tools.suckless.org/dmenu/patches/scroll/ 5
+https://tools.suckless.org/dmenu/patches/mouse-support/ 6
+
+https://tools.suckless.org/dmenu/patches/numbers/ 7+
+https://tools.suckless.org/dmenu/patches/line-height/ 8 +/- before grid
+
+https://tools.suckless.org/dmenu/patches/fuzzymatch/ before grid +
+https://tools.suckless.org/dmenu/patches/fuzzyhighlight/ before grid +
+
+fuzzymatch, 
+hightlaight, 
+border, 
+center dmenu, config +/-, 
+line-height config +/-
+numbers,
+mousesupport +/- dmenu.c
+scroll +/- dmenu.c
+rm XK_KP_Left, Right
+grid +/-
+grid_nav +/-
+add XK_KP_Left, Right
+
+
+
+w=`xdpyinfo | awk '/dimensions/{print $2}' | awk -F 'x' '{print $1}'`
+min_width=$((w/2))
+
+sudo apt install libx11-dev libxinerama-dev libxft-dev
+
+git clone https://git.suckless.org/dmenu
+git reset --hard d78ff08d99780a73447d5a95bf1e358e8c23aa3c
+
+wget -O dmenu-grid.diff https://tools.suckless.org/dmenu/patches/grid/dmenu-grid-4.9.diff
+wget -O dmenu-gridnav.diff https://tools.suckless.org/dmenu/patches/gridnav/dmenu-gridnav-5.0.diff
+wget -O dmenu-border.diff https://tools.suckless.org/dmenu/patches/border/dmenu-border-4.9.diff
+wget -O dmenu-center.diff https://tools.suckless.org/dmenu/patches/center/dmenu-center-20200111-8cd37e1.diff
+wget -O dmenu-mousesupport.diff https://tools.suckless.org/dmenu/patches/mouse-support/dmenu-mousesupport-5.0.diff
+wget -O dmenu-scroll.diff https://tools.suckless.org/dmenu/patches/scroll/dmenu-scroll-20180607-a314412.diff
+wget -O dmenu-numbers.diff https://tools.suckless.org/dmenu/patches/numbers/dmenu-numbers-4.9.diff
+wget -O dmenu-lineheight.diff https://tools.suckless.org/dmenu/patches/line-height/dmenu-lineheight-5.0.diff
+wget -O dmenu-fuzzymatch.diff https://tools.suckless.org/dmenu/patches/fuzzymatch/dmenu-fuzzymatch-4.9.diff
+wget -O dmenu-fuzzyhighlight.diff https://tools.suckless.org/dmenu/patches/fuzzyhighlight/dmenu-fuzzyhighlight-4.9.diff
+
+1. patch border
+2. patch center
+3. cp config.def.h config.h
+
+1. patch grid
+2. delete XK_KP_Left, RIght
+3. patch gridnav
+4. restore XK_KP_Left, RIght

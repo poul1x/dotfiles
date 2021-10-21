@@ -5,6 +5,12 @@ if [[ -r "${XDG_CACHE_HOME:-$HOME/.cache}/p10k-instant-prompt-${(%):-%n}.zsh" ]]
   source "${XDG_CACHE_HOME:-$HOME/.cache}/p10k-instant-prompt-${(%):-%n}.zsh"
 fi
 
+# Some terminal emulators don't export LS_COLORS
+# In that case, do it manually
+if [ -z "$LS_COLORS" ]; then
+    eval $(env TERM=xterm256-color dircolors)
+fi
+
 # If you come from bash you might have to change your $PATH.
 export PATH="$HOME/bin:/usr/local/bin:$PATH"
 
@@ -235,116 +241,11 @@ alias grep="rg"
 alias fd="fdfind --exclude /mnt"
 alias lsincludes='fd -a ".*.h*" . | xargs dirname | sort | uniq'
 
-
-# Clipboard copy / paste aliases
-alias clip_copy="clip.exe"                                              # echo "aaa" | clip_copy
-alias clip_paste="powershell.exe Get-Clipboard | dos2unix | xargs"      # echo $(clip_paste)
-
-
-# Keyboard selection & edit in shell (Shift + arrows)
-#
-start-selection() {
-  ((REGION_ACTIVE)) || zle set-mark-command
-  zle $1 -- $@
-}
-
-clear-selection() {
-  ((REGION_ACTIVE = 0))
-  zle $1 -- $@
-}
-
- delete-region-or-char() {
-    if ((REGION_ACTIVE)) then
-        zle kill-region
-    else
-        zle delete-char
-    fi
-}
-
-delete-region-or-backward-char() {
-    if ((REGION_ACTIVE)) then
-        zle kill-region
-    else
-        zle backward-delete-char
-    fi
-}
-
-copy-buffer() {
-    zle copy-region-as-kill
-    echo $CUTBUFFER | clip_copy
-}
-
-cut-buffer() {
-    zle copy-region-as-kill
-    zle kill-region
-    echo $CUTBUFFER | clip_copy
-}
-
-paste-buffer() {
-    BUFFER=$LBUFFER`clip_paste`$RBUFFER
-}
-
-shift-left() start-selection backward-char
-shift-right() start-selection forward-char
-ctrl-shift-left() start-selection backward-word
-ctrl-shift-right() start-selection forward-word
-arrow-left() clear-selection backward-char
-arrow-right() clear-selection forward-char
-ctrl-arrow-left() clear-selection backward-word
-ctrl-arrow-right() clear-selection forward-word
-key-home() clear-selection beginning-of-line
-key-end() clear-selection end-of-line
-shift-home() start-selection beginning-of-line
-shift-end() start-selection end-of-line
-
-zle -N shift-left
-zle -N shift-right
-zle -N ctrl-shift-left
-zle -N ctrl-shift-right
-zle -N clear-selection
-zle -N arrow-left
-zle -N arrow-right
-zle -N ctrl-arrow-left
-zle -N ctrl-arrow-right
-zle -N delete-region-or-char
-zle -N delete-region-or-backward-char
-zle -N key-home
-zle -N key-end
-zle -N shift-home
-zle -N shift-end
-zle -N copy-buffer
-zle -N cut-buffer
-zle -N paste-buffer
-
-## Terminal Keymap (use `cat -v`)
-# See https://github.com/softmoth/zsh-vim-mode/blob/master/zsh-vim-mode.plugin.zsh
-
-bindkey '^[OD'      arrow-left                      # [LeftArrow] - clear selecton if exists and move cursor left
-bindkey '^[OC'      arrow-right                     # [RightArrow] - clear selecton if exists and move cursor right
-bindkey '^[[1;2D'   shift-left                      # [Shift-LeftArrow] - select left char
-bindkey '^[[1;2C'   shift-right                     # [Shift-RightArrow] - select right char
-bindkey '^[[1;6D'   ctrl-shift-left                 # [Ctrl-Shift-Left] - select left word
-bindkey '^[[1;6C'   ctrl-shift-right                # [Ctrl-Shift-Right] - select right word
-bindkey '^[[1;5D'   ctrl-arrow-left                 # [Ctrl-LeftArrow] - clear selecton if exists and move backward one word
-bindkey '^[[1;5C'   ctrl-arrow-right                # [Ctrl-RightArrow] - clear selecton if exists and move forward one word
-bindkey '^[OH'      key-home                        # [Home] - clear selecton if exists and go to beginning of line
-bindkey '^[OF'      key-end                         # [End] - clear selecton if exists and go to end of line
-bindkey '^[[1;2H'   shift-home                      # [Shift-Home] - select from current position to beginning of line
-bindkey '^[[1;2F'   shift-end                       # [Shift-End] - select from current position to end of line
-bindkey '^[[3~'     delete-region-or-char           # [Delete] - delete selected region or char when no selection
-bindkey '^?'        delete-region-or-backward-char  # [BackSpace] - delete selected region or backward char when no selection
-
 # [Ctrl-E] - edit command prompt in vim
 bindkey '^E' edit-command-line
-#
+
 # [Ctrl-Space] - accept autosuggest command (zsh-autosuggestions plugin)
 bindkey '^@' autosuggest-accept
-
-# [Ctrl-Y] [Ctrl-P] [Ctrl-X] - copy, paste, cut
-bindkey '^Y' copy-buffer
-bindkey '^P' paste-buffer
-bindkey '^X' cut-buffer
-
 
 [ -f ~/.fzf.zsh ] && source ~/.fzf.zsh
 

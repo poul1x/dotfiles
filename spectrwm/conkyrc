@@ -1,0 +1,18 @@
+conky.config = {
+    out_to_x = false,
+    out_to_console = true,
+};
+
+-- Using spectrwm's 
+-- +@fg=1..N and bar_action_expand=1 
+-- parameters to make conky output colorful. 
+-- Using conky's $color does not affect output in spectrwm
+
+cpu = "+@fg=2; CPU: load $cpu%"
+ram = "+@fg=5; RAM: used $memperc% avail $mem / $memmax"
+swap = "+@fg=4; Swap: used $swapperc% avail $swap / $swapmax"
+storage = "+@fg=3; Disk: used $fs_used_perc% avail $fs_used / $fs_size"
+-- network = "+@fg=3; Inet:  $downspeedf KiB  $upspeedf KiB"
+date = "+@fg=1; ${time %a} ${time %d} ${time %b} ${time %Y} ${time %H}:${time %M} ${execp cat /etc/timezone}"
+
+conky.text = table.concat({date, cpu, ram, swap, storage}, " ")
