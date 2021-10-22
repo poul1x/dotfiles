@@ -9,7 +9,7 @@ XTerm*utf8: true
 XTerm*metaSendsEscape: true
 
 ! Line buffer
-XTerm*saveLines: 4096
+XTerm*saveLines: 10000
 
 ! Setup font
 ! xterm*faceName: DejaVu Sans Mono for Powerline
@@ -19,11 +19,6 @@ XTerm*faceSize: 14
 XTerm*transparent: true
 XTerm*shading:20
 
-! Setup colors
-XTerm*background: black
-XTerm*foreground: white
-XTerm*cursorColor: white
- 
 ! Prevent jumping back to the last line with new output
 XTerm*scrollTtyOutput: true
 
@@ -59,4 +54,40 @@ XTerm*translations: #override \
 ! Jump to begin/end of terminal output
 !    Shift <KeyPress> Home : scroll-to(begin) \n\
 !    Shift <KeyPress> End  : scroll-to(end) \n
-!
+
+! Setup colors
+XTerm*background:       #0C0C0C
+XTerm*foreground:       #DDDDDD
+XTerm*cursorColor:      #FFFFFF
+
+! Black
+xterm*color8:           #1D1F21
+xterm*color0:           #B0B0B0
+
+! Red
+xterm*color9:           #CB1B1B
+xterm*color1:           #3E0605
+
+! Green
+xterm*color10:          #4BC83A
+xterm*color2:           #34EF15
+
+! Yellow
+xterm*color11:          #E2DF12
+xterm*color3:           #FFFD00
+
+! Blue
+xterm*color12:          #35A4FF
+xterm*color4:           #1E3CFF
+
+! Purple
+xterm*color13:          #DC41DA
+xterm*color5:           #FD28FF
+
+! Cyan
+xterm*color14:          #0CBFBF
+xterm*color6:           #14FFFF
+
+! White
+xterm*color15:          #E5E5E5
+xterm*color7:           #FFFFFF

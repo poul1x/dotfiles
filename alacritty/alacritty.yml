@@ -224,14 +224,14 @@ colors:
     # affected cell, or hexadecimal colors like #ff00ff.
     matches:
       foreground: '#000000'
-      background: '#ffffff'
+      background: '#FFFFFF'
     focused_match:
-      foreground: '#ffffff'
+      foreground: '#FFFFFF'
       background: '#000000'
 
     bar:
-      background: '#c5c8c6'
-      foreground: '#1d1f21'
+      background: '#C5C8C6'
+      foreground: '#1D1F21'
 
   # Keyboard regex hints
   #hints:
@@ -240,16 +240,16 @@ colors:
     # Allowed values are CellForeground/CellBackground, which reference the
     # affected cell, or hexadecimal colors like #ff00ff.
     start:
-      foreground: '#1d1f21'
-      background: '#e9ff5e'
+      foreground: '#1D1F21'
+      background: '#E9FF5E'
 
     # All characters after the first one in the hint label
     #
     # Allowed values are CellForeground/CellBackground, which reference the
     # affected cell, or hexadecimal colors like #ff00ff.
     end:
-      foreground: '#e9ff5e'
-      background: '#1d1f21'
+      foreground: '#E9FF5E'
+      background: '#1D1F21'
 
   # Line indicator
   #
@@ -273,21 +273,21 @@ colors:
 
   # Normal colors
   normal:
-    black:   '#1d1f21'
+    black:   '#1D1F21'
     red:     '#CB1B1B'
     green:   '#4BC83A'
     yellow:  '#E2DF12'
-    blue:    '#35a4ff'
+    blue:    '#35A4FF'
     magenta: '#DC41DA'
     cyan:    '#0CBFBF'
     white:   '#E5E5E5'
 
   # Bright colors
   bright:
-    black:   '#b0b0b0'
+    black:   '#B0B0B0'
     red:     '#3E0605'
     green:   '#34EF15'
-    yellow:  '#fffd00'
+    yellow:  '#FFFD00'
     blue:    '#1E3CFF'
     magenta: '#FD28FF'
     cyan:    '#14FFFF'
@@ -300,11 +300,11 @@ colors:
   #dim:
   #  black:   '#131415'
   #  red:     '#864343'
-  #  green:   '#777c44'
-  #  yellow:  '#9e824c'
-  #  blue:    '#556a7d'
-  #  magenta: '#75617b'
-  #  cyan:    '#5b7d78'
+  #  green:   '#777C44'
+  #  yellow:  '#9E824C'
+  #  blue:    '#556A7D'
+  #  magenta: '#75617B'
+  #  cyan:    '#5B7D78'
   #  white:   '#828482'
 
   # Indexed Colors
