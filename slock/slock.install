@@ -1,0 +1,12 @@
+# Patches applied:
+wget -O slock-dpms.diff https://tools.suckless.org/slock/patches/dpms/slock-dpms-1.4.diff
+wget -O slock-controlclear.diff https://tools.suckless.org/slock/patches/control-clear/
+wget -O slock-colormessage.diff https://tools.suckless.org/slock/patches/colormessage/slock-colormessa..
+wget -O slock-blurpixelatedscreen.diff https://tools.suckless.org/slock/patches/blur-pixelated-screen/..
+
+
+git clone https://git.suckless.org/slock
+git reset --hard 35633d45672d14bd798c478c45d1a17064701aa9
+
+# Deps
+sudo apt install libxrandr-dev libimlib2 libimlib2-dev

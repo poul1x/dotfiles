@@ -1,0 +1,449 @@
+diff --color -ruN -x .git slock/config.def.h slock-patched/config.def.h
+--- slock/config.def.h	2021-10-21 15:13:20.531903973 -0500
++++ slock-patched/config.def.h	2021-10-21 15:37:52.095207059 -0500
+@@ -9,4 +9,29 @@
+ };
+ 
+ /* treat a cleared input like a wrong password (color) */
+-static const int failonclear = 1;
++static const int failonclear = 0;
++
++/*Enable blur*/
++/* #define BLUR */
++/*Set blur radius*/
++static const int blurRadius=2;
++/*Enable Pixelation*/
++#define PIXELATION
++/*Set pixelation radius*/
++static const int pixelSize=14;
++
++
++/* default message */
++static const char * message = "Suckless: Software that sucks less.";
++
++/* text color */
++static const char * text_color = "#ffffff";
++
++/* text size (must be a valid size) */
++static const char * font_name = "10x20";
++
++/* allow control key to trigger fail on clear */
++static const int controlkeyclear = 0;
++
++/* time in seconds before the monitor shuts down */
++static const int monitortime = 5;
+diff --color -ruN -x .git slock/config.mk slock-patched/config.mk
+--- slock/config.mk	2021-10-21 15:13:20.531903973 -0500
++++ slock-patched/config.mk	2021-10-21 13:56:31.172884318 -0500
+@@ -12,11 +12,11 @@
+ 
+ # includes and libs
+ INCS = -I. -I/usr/include -I${X11INC}
+-LIBS = -L/usr/lib -lc -lcrypt -L${X11LIB} -lX11 -lXext -lXrandr
++LIBS = -L/usr/lib -lc -lcrypt -L${X11LIB} -lX11 -lXext -lXrandr -lImlib2 -lXinerama
+ 
+ # flags
+ CPPFLAGS = -DVERSION=\"${VERSION}\" -D_DEFAULT_SOURCE -DHAVE_SHADOW_H
+-CFLAGS = -std=c99 -pedantic -Wall -Os ${INCS} ${CPPFLAGS}
++CFLAGS = -std=c99 -pedantic -Wall -Ofast ${INCS} ${CPPFLAGS}
+ LDFLAGS = -s ${LIBS}
+ COMPATSRC = explicit_bzero.c
+ 
+diff --color -ruN -x .git slock/slock.1 slock-patched/slock.1
+--- slock/slock.1	2021-10-21 15:13:20.531903973 -0500
++++ slock-patched/slock.1	2021-10-21 13:53:55.683315659 -0500
+@@ -6,6 +6,8 @@
+ .Sh SYNOPSIS
+ .Nm
+ .Op Fl v
++.Op Fl f
++.Op Fl m Ar message
+ .Op Ar cmd Op Ar arg ...
+ .Sh DESCRIPTION
+ .Nm
+@@ -16,6 +18,11 @@
+ .Bl -tag -width Ds
+ .It Fl v
+ Print version information to stdout and exit.
++.It Fl f
++List all valid X fonts and exit.
++.It Fl m Ar message
++Overrides default slock lock message.
++.TP
+ .El
+ .Sh SECURITY CONSIDERATIONS
+ To make sure a locked screen can not be bypassed by switching VTs
+diff --color -ruN -x .git slock/slock.c slock-patched/slock.c
+--- slock/slock.c	2021-10-21 15:13:20.531903973 -0500
++++ slock-patched/slock.c	2021-10-21 15:02:06.237633131 -0500
+@@ -15,15 +15,21 @@
+ #include <unistd.h>
+ #include <sys/types.h>
+ #include <X11/extensions/Xrandr.h>
++#include <X11/extensions/Xinerama.h>
++#include <X11/extensions/dpms.h>
+ #include <X11/keysym.h>
+ #include <X11/Xlib.h>
+ #include <X11/Xutil.h>
++#include <Imlib2.h>
+ 
+ #include "arg.h"
+ #include "util.h"
+ 
+ char *argv0;
+ 
++/* global count to prevent repeated error messages */
++int count_error = 0;
++
+ enum {
+ 	INIT,
+ 	INPUT,
+@@ -35,6 +41,7 @@
+ 	int screen;
+ 	Window root, win;
+ 	Pixmap pmap;
++	Pixmap bgmap;
+ 	unsigned long colors[NUMCOLS];
+ };
+ 
+@@ -46,6 +53,8 @@
+ 
+ #include "config.h"
+ 
++Imlib_Image image;
++
+ static void
+ die(const char *errstr, ...)
+ {
+@@ -83,6 +92,132 @@
+ }
+ #endif
+ 
++static int
++readescapedint(const char *str, int *i) {
++	int n = 0;
++	if (str[*i])
++		++*i;
++	while(str[*i] && str[*i] != ';' && str[*i] != 'm') {
++		n = 10 * n + str[*i] - '0';
++		++*i;
++	}
++	return n;
++}
++
++static void
++writemessage(Display *dpy, Window win, int screen)
++{
++	int len, line_len, width, height, s_width, s_height, i, k, tab_size, r, g, b, escaped_int, curr_line_len;
++	XGCValues gr_values;
++	XFontStruct *fontinfo;
++	XColor color, dummy;
++	XineramaScreenInfo *xsi;
++	GC gc;
++	fontinfo = XLoadQueryFont(dpy, font_name);
++
++	if (fontinfo == NULL) {
++		if (count_error == 0) {
++			fprintf(stderr, "slock: Unable to load font \"%s\"\n", font_name);
++			fprintf(stderr, "slock: Try listing fonts with 'slock -f'\n");
++			count_error++;
++		}
++		return;
++	}
++
++	tab_size = 8 * XTextWidth(fontinfo, " ", 1);
++
++	XAllocNamedColor(dpy, DefaultColormap(dpy, screen),
++		 text_color, &color, &dummy);
++
++	gr_values.font = fontinfo->fid;
++	gr_values.foreground = color.pixel;
++	gc=XCreateGC(dpy,win,GCFont+GCForeground, &gr_values);
++
++	/*  To prevent "Uninitialized" warnings. */
++	xsi = NULL;
++
++	/*
++	 * Start formatting and drawing text
++	 */
++
++	len = strlen(message);
++
++	/* Max max line length (cut at '\n') */
++	line_len = curr_line_len = 0;
++	k = 0;
++	for (i = 0; i < len; i++) {
++		if (message[i] == '\n') {
++			curr_line_len = 0;
++			k++;
++		} else if (message[i] == 0x1b) {
++			while (i < len && message[i] != 'm') {
++				i++;
++			}
++			if (i == len)
++				die("slock: unclosed escape sequence\n");
++		} else {
++			curr_line_len += XTextWidth(fontinfo, message + i, 1);
++			if (curr_line_len > line_len)
++				line_len = curr_line_len;
++		}
++	}
++	/* If there is only one line */
++	if (line_len == 0)
++		line_len = len;
++
++	if (XineramaIsActive(dpy)) {
++		xsi = XineramaQueryScreens(dpy, &i);
++		s_width = xsi[0].width;
++		s_height = xsi[0].height;
++	} else {
++		s_width = DisplayWidth(dpy, screen);
++		s_height = DisplayHeight(dpy, screen);
++	}
++	height = s_height*3/7 - (k*20)/3;
++	width  = (s_width - line_len)/2;
++
++	line_len = 0;
++	/* print the text while parsing 24 bit color ANSI escape codes*/
++	for (i = k = 0; i < len; i++) {
++		switch (message[i]) {
++			case '\n':
++				line_len = 0;
++				while (message[i + 1] == '\t') {
++					line_len += tab_size;
++					i++;
++				}
++				k++;
++				break;
++			case 0x1b:
++				i++;
++				if (message[i] == '[') {
++					escaped_int = readescapedint(message, &i);
++					if (escaped_int == 39)
++						continue;
++					if (escaped_int != 38)
++						die("slock: unknown escape sequence%d\n", escaped_int);
++					if (readescapedint(message, &i) != 2)
++						die("slock: only 24 bit color supported\n");
++					r = readescapedint(message, &i) & 0xff;
++					g = readescapedint(message, &i) & 0xff;
++					b = readescapedint(message, &i) & 0xff;
++					XSetForeground(dpy, gc, r << 16 | g << 8 | b);
++				} else
++					die("slock: unknown escape sequence\n");
++				break;
++			default:
++				XDrawString(dpy, win, gc, width + line_len, height + 20 * k, message + i, 1);
++				line_len += XTextWidth(fontinfo, message + i, 1);
++		}
++	}
++
++	/* xsi should not be NULL anyway if Xinerama is active, but to be safe */
++	if (XineramaIsActive(dpy) && xsi != NULL)
++			XFree(xsi);
++}
++
++
++
+ static const char *
+ gethash(void)
+ {
+@@ -180,8 +315,9 @@
+ 					passwd[--len] = '\0';
+ 				break;
+ 			default:
+-				if (num && !iscntrl((int)buf[0]) &&
+-				    (len + num < sizeof(passwd))) {
++				if (controlkeyclear && iscntrl((int)buf[0]))
++					continue;
++				if (num && (len + num < sizeof(passwd))) {
+ 					memcpy(passwd + len, buf, num);
+ 					len += num;
+ 				}
+@@ -190,10 +326,12 @@
+ 			color = len ? INPUT : ((failure || failonclear) ? FAILED : INIT);
+ 			if (running && oldc != color) {
+ 				for (screen = 0; screen < nscreens; screen++) {
+-					XSetWindowBackground(dpy,
+-					                     locks[screen]->win,
+-					                     locks[screen]->colors[color]);
++                    if(locks[screen]->bgmap)
++                        XSetWindowBackgroundPixmap(dpy, locks[screen]->win, locks[screen]->bgmap);
++                    else
++                        XSetWindowBackground(dpy, locks[screen]->win, locks[screen]->colors[0]);
+ 					XClearWindow(dpy, locks[screen]->win);
++					writemessage(dpy, locks[screen]->win, screen);
+ 				}
+ 				oldc = color;
+ 			}
+@@ -235,6 +373,17 @@
+ 	lock->screen = screen;
+ 	lock->root = RootWindow(dpy, lock->screen);
+ 
++    if(image) 
++    {
++        lock->bgmap = XCreatePixmap(dpy, lock->root, DisplayWidth(dpy, lock->screen), DisplayHeight(dpy, lock->screen), DefaultDepth(dpy, lock->screen));
++        imlib_context_set_image(image);
++        imlib_context_set_display(dpy);
++        imlib_context_set_visual(DefaultVisual(dpy, lock->screen));
++        imlib_context_set_colormap(DefaultColormap(dpy, lock->screen));
++        imlib_context_set_drawable(lock->bgmap);
++        imlib_render_image_on_drawable(0, 0);
++        imlib_free_image();
++    }
+ 	for (i = 0; i < NUMCOLS; i++) {
+ 		XAllocNamedColor(dpy, DefaultColormap(dpy, lock->screen),
+ 		                 colorname[i], &color, &dummy);
+@@ -251,6 +400,8 @@
+ 	                          CopyFromParent,
+ 	                          DefaultVisual(dpy, lock->screen),
+ 	                          CWOverrideRedirect | CWBackPixel, &wa);
++    if(lock->bgmap)
++        XSetWindowBackgroundPixmap(dpy, lock->win, lock->bgmap);
+ 	lock->pmap = XCreateBitmapFromData(dpy, lock->win, curs, 8, 8);
+ 	invisible = XCreatePixmapCursor(dpy, lock->pmap, lock->pmap,
+ 	                                &color, &color, 0, 0);
+@@ -300,7 +451,7 @@
+ static void
+ usage(void)
+ {
+-	die("usage: slock [-v] [cmd [arg ...]]\n");
++	die("usage: slock [-v] [-f] [-m message] [cmd [arg ...]]\n");
+ }
+ 
+ int
+@@ -313,12 +464,26 @@
+ 	gid_t dgid;
+ 	const char *hash;
+ 	Display *dpy;
+-	int s, nlocks, nscreens;
++	int i, s, nlocks, nscreens;
++ 	CARD16 standby, suspend, off;
++	int count_fonts;
++	char **font_names;
+ 
+ 	ARGBEGIN {
+ 	case 'v':
+ 		fprintf(stderr, "slock-"VERSION"\n");
+ 		return 0;
++	case 'm':
++		message = EARGF(usage());
++		break;
++	case 'f':
++		if (!(dpy = XOpenDisplay(NULL)))
++			die("slock: cannot open display\n");
++		font_names = XListFonts(dpy, "*", 10000 /* list 10000 fonts*/, &count_fonts);
++		for (i=0; i<count_fonts; i++) {
++			fprintf(stderr, "%s\n", *(font_names+i));
++		}
++		return 0;
+ 	default:
+ 		usage();
+ 	} ARGEND
+@@ -355,6 +520,60 @@
+ 	if (setuid(duid) < 0)
+ 		die("slock: setuid: %s\n", strerror(errno));
+ 
++	/*Create screenshot Image*/
++	Screen *scr = ScreenOfDisplay(dpy, DefaultScreen(dpy));
++	image = imlib_create_image(scr->width,scr->height);
++	imlib_context_set_image(image);
++	imlib_context_set_display(dpy);
++	imlib_context_set_visual(DefaultVisual(dpy,0));
++	imlib_context_set_drawable(RootWindow(dpy,XScreenNumberOfScreen(scr)));	
++	imlib_copy_drawable_to_image(0,0,0,scr->width,scr->height,0,0,1);
++
++#ifdef BLUR
++
++	/*Blur function*/
++	imlib_image_blur(blurRadius);
++#endif // BLUR	
++
++#ifdef PIXELATION
++	/*Pixelation*/
++	int width = scr->width;
++	int height = scr->height;
++	
++	for(int y = 0; y < height; y += pixelSize)
++	{
++		for(int x = 0; x < width; x += pixelSize)
++		{
++			int red = 0;
++			int green = 0;
++			int blue = 0;
++
++			Imlib_Color pixel; 
++			Imlib_Color* pp;
++			pp = &pixel;
++			for(int j = 0; j < pixelSize && j < height; j++)
++			{
++				for(int i = 0; i < pixelSize && i < width; i++)
++				{
++					imlib_image_query_pixel(x+i,y+j,pp);
++					red += pixel.red;
++					green += pixel.green;
++					blue += pixel.blue;
++				}
++			}
++			red /= (pixelSize*pixelSize);
++			green /= (pixelSize*pixelSize);
++			blue /= (pixelSize*pixelSize);
++			imlib_context_set_color(red,green,blue,pixel.alpha);
++			imlib_image_fill_rectangle(x,y,pixelSize,pixelSize);
++			red = 0;
++			green = 0;
++			blue = 0;
++		}
++	}
++	
++	
++#endif
+ 	/* check for Xrandr support */
+ 	rr.active = XRRQueryExtension(dpy, &rr.evbase, &rr.errbase);
+ 
+@@ -363,10 +582,12 @@
+ 	if (!(locks = calloc(nscreens, sizeof(struct lock *))))
+ 		die("slock: out of memory\n");
+ 	for (nlocks = 0, s = 0; s < nscreens; s++) {
+-		if ((locks[s] = lockscreen(dpy, &rr, s)) != NULL)
++		if ((locks[s] = lockscreen(dpy, &rr, s)) != NULL) {
++			writemessage(dpy, locks[s]->win, s);
+ 			nlocks++;
+-		else
++		} else {
+ 			break;
++		}
+ 	}
+ 	XSync(dpy, 0);
+ 
+@@ -374,6 +595,20 @@
+ 	if (nlocks != nscreens)
+ 		return 1;
+ 
++	/* DPMS magic to disable the monitor */
++	if (!DPMSCapable(dpy))
++		die("slock: DPMSCapable failed\n");
++	if (!DPMSEnable(dpy))
++		die("slock: DPMSEnable failed\n");
++	if (!DPMSGetTimeouts(dpy, &standby, &suspend, &off))
++		die("slock: DPMSGetTimeouts failed\n");
++	if (!standby || !suspend || !off)
++		die("slock: at least one DPMS variable is zero\n");
++	if (!DPMSSetTimeouts(dpy, monitortime, monitortime, monitortime))
++		die("slock: DPMSSetTimeouts failed\n");
++
++	XSync(dpy, 0);
++
+ 	/* run post-lock command */
+ 	if (argc > 0) {
+ 		switch (fork()) {
+@@ -391,5 +626,9 @@
+ 	/* everything is now blank. Wait for the correct password */
+ 	readpw(dpy, &rr, locks, nscreens, hash);
+ 
++	/* reset DPMS values to inital ones */
++	DPMSSetTimeouts(dpy, standby, suspend, off);
++	XSync(dpy, 0);
++
+ 	return 0;
+ }

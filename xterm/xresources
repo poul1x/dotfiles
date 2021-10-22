@@ -1,0 +1,62 @@
+! Set 256 color
+XTerm.termName: xterm-256color
+
+! Force UTF-8
+XTerm*locale: false
+XTerm*utf8: true
+
+! Sends Esc when Alt key is pressed
+XTerm*metaSendsEscape: true
+
+! Line buffer
+XTerm*saveLines: 4096
+
+! Setup font
+! xterm*faceName: DejaVu Sans Mono for Powerline
+XTerm*faceName: MesloLGS Nerd Font
+XTerm*faceSize: 14
+
+XTerm*transparent: true
+XTerm*shading:20
+
+! Setup colors
+XTerm*background: black
+XTerm*foreground: white
+XTerm*cursorColor: white
+ 
+! Prevent jumping back to the last line with new output
+XTerm*scrollTtyOutput: true
+
+! Notify when long tunning tasks finished: make bell urgent
+XTerm*bellIsUrgent: true
+
+! Turn bell sound into visual effect
+XTerm*visualBell: true
+
+! Override keys
+XTerm*translations: #override \
+    Ctrl <Key> +: larger-vt-font() \n\
+    Ctrl <Key> -: smaller-vt-font() \n\
+    Shift Ctrl <Key> C: copy-selection(CLIPBOARD) \n\
+    Shift Ctrl <Key> V: insert-selection(CLIPBOARD) \n\
+    <KeyPress> Prior : scroll-back(1,halfpage) \n\
+    <KeyPress> Next  : scroll-forw(1,halfpage) \n\
+    Shift <KeyPress> Home : scroll-to(begin) \n\
+    Shift <KeyPress> End  : scroll-to(end)
+
+! Increase / decrease text
+!    Ctrl <Key> +: larger-vt-font() \n\
+!    Ctrl <Key> -: smaller-vt-font() \n\
+!
+! Copy/paste selection
+!    Shift Ctrl <Key> C: copy-selection(CLIPBOARD) \n\
+!    Shift Ctrl <Key> V: insert-selection(CLIPBOARD) \n\
+!
+! Jump up and down when pressing PgUp and PgDown
+!    <KeyPress> Prior : scroll-back(1,halfpage) \n\
+!    <KeyPress> Next  : scroll-forw(1,halfpage) \n\
+!
+! Jump to begin/end of terminal output
+!    Shift <KeyPress> Home : scroll-to(begin) \n\
+!    Shift <KeyPress> End  : scroll-to(end) \n
+!
