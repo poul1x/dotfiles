@@ -211,9 +211,9 @@ alias kl='kubectl logs --tail=2000'
 alias kla='kubectl logs'
 
 alias kctx="kubectl config get-contexts"
-alias kuser="kubectl config get-contexts | grep '\*' | awk '{print \$2}'"
 alias kns="kubectl config get-contexts | grep '\*' | awk '{print \$5}'"
-alias kcns="kubectl config set-context --current --namespace"
+alias kcns="kubectl config set-context --current --namespace \`kubectl get namespaces | tail -n +2 | awk '{print \$1}' | fzf\`"
+alias kcc="kubectl config use-context \`kubectl config get-contexts | tail -n +2 | tr '*' ' ' | awk '{print \$1}' | fzf\`"
 
 alias kshell="! kubectl get pods 2>1 | grep -q 'No resources' && kubectl exec -it \`kubectl get pods | fzf | awk '{print \$1}'\` -- sh || echo 'No pods are running in current namespace'"
 alias kshellb="! kubectl get pods 2>1 | grep -q 'No resources' && kubectl exec -it \`kubectl get pods | fzf | awk '{print \$1}'\` -- bash || echo 'No pods are running in current namespace'"
